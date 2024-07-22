@@ -1,0 +1,9 @@
+Risk: 95%
+
+Indicators:
+1. Urgent language: The subject line "Urgent: Your Account Has Been Suspended!" creates a sense of urgency to prompt the recipient to take immediate action without thinking critically.
+2. Unusual activity claim: Scammers often use the pretext of "unusual activity" to persuade targets to click on malicious links or provide sensitive information.
+3. Request for verifying identity: Phishing emails commonly ask recipients to verify their identity or account details using a link, which can lead to credentials being stolen.
+4. Suspicious link: The presence of a "Fake Verification Link" could lead to a phishing site designed to steal personal information or login credentials.
+
+Based on these indicators, it is highly likely that this email is a phishing attempt.

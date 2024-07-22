@@ -1,0 +1,13 @@
+Subject: Urgent: Your Account Has Been Suspended!
+
+Dear Customer,
+
+We have detected unusual activity on your account. To protect your information, we have temporarily suspended your account. Please verify your identity immediately to restore access.
+
+Click the link below to verify your account:
+[Fake Verification Link]
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+Bank Security Team
