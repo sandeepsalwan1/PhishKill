@@ -1,0 +1,9 @@
+Risk: 5%
+
+Indicators used:
+1. The content of the email seems to be related to a typical work-related meeting.
+2. The language and tone used in the email are professional.
+3. The sender's name and title are provided in the signature.
+4. No urgent requests for personal information or login credentials are included in the email.
+   
+Overall, based on the provided information, there are no clear indicators of this email being a phishing attempt. However, as always, it's important to verify the sender's email address and use caution when clicking on any links or attachments in the email.
