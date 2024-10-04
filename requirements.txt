@@ -153,7 +153,6 @@ rsa==4.9
 ruamel.yaml @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/ruamel.yaml_1699247046910/work
 scikit-learn==1.5.1
 scipy==1.14.1
-Send2Trash==1.8.3
 setuptools==69.5.1
 sip @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/sip_1699241391218/work
 six @ file:///tmp/build/80754af9/six_1644875935023/work
