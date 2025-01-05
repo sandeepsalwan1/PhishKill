@@ -1,3 +1,12 @@
+## PhishKill
+PhishKill enhances email security by using AI to detect phishing threats and assess risks. link: https://phishkill1-c5b98987403b.herokuapp.com/
+ It provides actionable advice, empowering users to protect themselves against malicious emails.
+
+<p align="center">
+  <img src="resources/example.jpeg" alt="Example Image" width="100%">
+</p>
+
+
 <p align="center">
     <img src="https://raw.githubusercontent.com/PKief/vscode-material-icon-theme/ec559a9f6bfd399b82bb44393651661b08aaf7ba/icons/folder-markdown-open.svg" align="center" width="30%">
 </p>
