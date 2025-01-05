@@ -3,7 +3,7 @@ PhishKill enhances email security by using AI to detect phishing threats and ass
  It provides actionable advice, empowering users to protect themselves against malicious emails.
 
 <p align="center">
-  <img src="resources/example.jpeg" alt="Example Image" width="100%">
+  <img src="resources/example.jpg" alt="Example Image" width="100%">
 </p>
 
 
