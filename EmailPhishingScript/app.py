@@ -21,7 +21,18 @@ talk = [
     {"role": "system", "content": "You're an assistant that helps detecting phishing mails."}
 ]
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'phishkill.db')
+def resolve_db_path() -> str:
+    base_dir = os.path.dirname(__file__)
+    try:
+        if os.access(base_dir, os.W_OK):
+            return os.path.join(base_dir, 'phishkill.db')
+    except Exception:
+        pass
+    tmp_dir = os.environ.get('TMPDIR') or '/tmp'
+    return os.path.join(tmp_dir, 'phishkill.db')
+
+
+DB_PATH = resolve_db_path()
 
 
 def get_db_connection():

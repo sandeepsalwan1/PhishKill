@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "EmailPhishingScript/app.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "EmailPhishingScript/app.py" }
+  ],
+  "functions": {
+    "EmailPhishingScript/app.py": {
+      "maxDuration": 60,
+      "runtime": "python3.11"
+    }
+  }
+}

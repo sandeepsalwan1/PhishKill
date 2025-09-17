@@ -218,19 +218,27 @@ docker run --rm -p 5000:5000 --env-file .env phishkill:latest
 ```
 
 ### ☁️ Heroku
+If you prefer Heroku, a `Procfile` is included; however, Vercel is recommended below.
+### ▲ Vercel
 
-1) Ensure you have a Heroku account and the CLI installed.
-2) Create app and set config:
+Deploy the Flask app on Vercel (serverless) using `vercel.json` routing to `EmailPhishingScript/app.py`.
+
+1) Install Vercel CLI:
 ```sh
-heroku create
-heroku config:set OPENAI_API_KEY=YOUR_KEY
+npm i -g vercel
+```
+2) Set env var (Dashboard or CLI):
+```sh
+vercel env add OPENAI_API_KEY
 ```
 3) Deploy:
 ```sh
-git add . && git commit -m "Deploy"
-git push heroku HEAD:main
+vercel
 ```
-Open the app URL printed by Heroku.
+
+Notes:
+- SQLite on Vercel is ephemeral. For durable history, use a hosted DB (e.g., Neon/Postgres, PlanetScale/MySQL, or Vercel KV) and switch the connection in `EmailPhishingScript/app.py`.
+- The app exposes `/api/classify`, `/api/history`, `/healthz`, and the UI at `/`.
 
 
 ### 🧪 Testing
