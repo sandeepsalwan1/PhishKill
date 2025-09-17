@@ -8,6 +8,9 @@
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
+    <style>
+      .gradient { background: linear-gradient(135deg, #111827 0%, #0b1220 100%); }
+    </style>
   </head>
   <body
     class="leading-normal tracking-normal text-white gradient"
@@ -77,40 +80,75 @@
         <div
           class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left"
         >
-          <h1 class="my-4 text-5xl font-bold leading-tight">
-            Check Your Emails for Spam
-          </h1>
-          <p class="leading-normal text-2xl mb-8">
-            Paste your email content below and we'll check it for spam
-            indicators.
-          </p>
+          <h1 class="my-4 text-5xl font-bold leading-tight">Phish Kill</h1>
+          <p class="leading-normal text-2xl mb-8">Paste email content and get an instant phishing risk assessment.</p>
+          <div class="w-full bg-gray-800 rounded-lg p-4 border border-gray-700">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-300">Overall Risk</span>
+              <span id="riskValue" class="text-2xl font-bold">—</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded h-3 mt-3">
+              <div id="riskBar" class="bg-green-500 h-3 rounded" style="width:0%"></div>
+            </div>
+          </div>
         </div>
         <!--Right Col-->
         <div class="w-full md:w-3/5 py-6 text-center">
           <textarea
             id="emailContent"
-            class="w-full p-4 border rounded mb-4 h-40"
+            class="w-full p-4 border border-gray-700 bg-gray-800 rounded mb-4 h-48 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
             placeholder="Paste your email content here..."
           ></textarea>
-          <button
-            id="checkSpam"
-            class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-          >
-            Check for Spam
-          </button>
+          <div class="flex space-x-3">
+            <button
+              id="checkSpam"
+              class="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none"
+            >
+              Analyze Email
+            </button>
+            <button
+              id="useSample"
+              class="px-4 py-2 rounded border border-gray-700 hover:bg-gray-800"
+            >
+              Use Sample
+            </button>
+            <button
+              id="clearText"
+              class="px-4 py-2 rounded border border-gray-700 hover:bg-gray-800"
+            >
+              Clear
+            </button>
+          </div>
+          <div id="loading" class="text-gray-400 text-sm mt-3 hidden">Analyzing…</div>
         </div>
       </div>
     </div>
 
     <!--Spam Check Results-->
     <div class="container mx-auto px-3 pt-10">
-      <div id="summary" class="p-4 bg-blue-100 rounded hidden">
-        <h2 class="text-xl font-semibold text-gray-900">Summary</h2>
-        <p id="risk" class="mt-2 text-gray-800"></p>
-      </div>
-      <div id="details" class="mt-4 p-4 bg-yellow-100 rounded hidden">
-        <h2 class="text-xl font-semibold text-gray-900">Details</h2>
-        <ul id="indicators" class="list-disc list-inside text-gray-800"></ul>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div id="summary" class="p-4 rounded bg-gray-800 border border-gray-700 hidden">
+            <h2 class="text-xl font-semibold">Summary</h2>
+            <p id="risk" class="mt-2 text-gray-300"></p>
+          </div>
+          <div id="details" class="mt-4 p-4 rounded bg-gray-800 border border-gray-700 hidden">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-semibold">Indicators</h2>
+              <button id="copyIndicators" class="text-sm text-blue-400 hover:text-blue-300">Copy</button>
+            </div>
+            <ul id="indicators" class="list-disc list-inside text-gray-300 mt-2"></ul>
+          </div>
+        </div>
+        <div>
+          <div class="p-4 rounded bg-gray-800 border border-gray-700">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-semibold">Recent Analyses</h2>
+              <button id="refreshHistory" class="text-sm text-blue-400 hover:text-blue-300">Refresh</button>
+            </div>
+            <ul id="historyList" class="mt-3 space-y-3"></ul>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -230,52 +268,116 @@
     </footer>
 
     <script>
-      document
-        .getElementById("checkSpam")
-        .addEventListener("click", function () {
-          const emailContent = document.getElementById("emailContent").value;
-          if (emailContent.trim() === "") {
-            alert("Please paste some email content first.");
-            return;
-          }
+      const emailEl = document.getElementById('emailContent');
+      const checkBtn = document.getElementById('checkSpam');
+      const sampleBtn = document.getElementById('useSample');
+      const clearBtn = document.getElementById('clearText');
+      const loadingEl = document.getElementById('loading');
+      const riskEl = document.getElementById('risk');
+      const riskValueEl = document.getElementById('riskValue');
+      const riskBarEl = document.getElementById('riskBar');
+      const indicatorsList = document.getElementById('indicators');
+      const copyBtn = document.getElementById('copyIndicators');
+      const historyList = document.getElementById('historyList');
+      const refreshHistoryBtn = document.getElementById('refreshHistory');
 
-          classifyEmail(emailContent);
-        });
+      checkBtn.addEventListener('click', async () => {
+        const text = emailEl.value.trim();
+        if (!text) { alert('Please paste some email content first.'); return; }
+        setLoading(true);
+        try {
+          const res = await fetch('/api/classify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Unexpected error');
+          renderResults(data.risk, data.indicators);
+          await loadHistory();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          setLoading(false);
+        }
+      });
 
-      function classifyEmail(emailText) {
-        fetch("http://localhost:5000/classify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: emailText })
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            displayResults(data.risk, data.indicators);
-          })
-          .catch((error) => console.error("Error:", error));
+      sampleBtn.addEventListener('click', () => {
+        emailEl.value = `Subject: Important - Verify Your Account Immediately\n\nDear User,\n\nWe noticed unusual activity on your account. To secure your account, please verify your identity by clicking the link below within 24 hours or your account will be suspended.\n\nVerify now: http://security-update.example-login.com/verify\n\nThank you,\nSecurity Team`;
+      });
+
+      clearBtn.addEventListener('click', () => {
+        emailEl.value = '';
+      });
+
+      copyBtn.addEventListener('click', async () => {
+        const items = Array.from(indicatorsList.querySelectorAll('li')).map(li => li.textContent);
+        if (items.length === 0) return;
+        await navigator.clipboard.writeText(items.join('\n'));
+      });
+
+      refreshHistoryBtn.addEventListener('click', loadHistory);
+
+      function setLoading(isLoading) {
+        loadingEl.classList.toggle('hidden', !isLoading);
+        checkBtn.disabled = isLoading;
+        checkBtn.classList.toggle('opacity-60', isLoading);
       }
 
-      function displayResults(risk, indicators) {
-        document.getElementById("risk").textContent = `Risk: ${risk}%`;
-        document.getElementById("summary").classList.remove("hidden");
+      function renderResults(risk, indicators) {
+        // Summary
+        document.getElementById('summary').classList.remove('hidden');
+        riskEl.textContent = `Risk: ${risk}%`;
 
-        const indicatorsList = document.getElementById("indicators");
-        indicatorsList.innerHTML = "";
-        indicators.forEach((indicator, index) => {
-          const li = document.createElement("li");
+        // Gauge
+        riskValueEl.textContent = `${risk}%`;
+        riskBarEl.style.width = `${Math.max(0, Math.min(100, risk))}%`;
+        const color = risk < 30 ? 'bg-green-500' : (risk < 70 ? 'bg-yellow-500' : 'bg-red-600');
+        riskBarEl.classList.remove('bg-green-500','bg-yellow-500','bg-red-600');
+        riskBarEl.classList.add(color);
+
+        // Indicators
+        indicatorsList.innerHTML = '';
+        (indicators || []).forEach((indicator, index) => {
+          const li = document.createElement('li');
           li.textContent = `${index + 1}. ${indicator}`;
           indicatorsList.appendChild(li);
         });
-        document.getElementById("details").classList.remove("hidden");
+        document.getElementById('details').classList.remove('hidden');
       }
 
-      // Mobile menu toggle
-      const navToggle = document.getElementById("nav-toggle");
-      const navContent = document.getElementById("nav-content");
+      async function loadHistory() {
+        try {
+          const res = await fetch('/api/history?limit=20');
+          const data = await res.json();
+          const items = data.items || [];
+          historyList.innerHTML = '';
+          items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'p-3 rounded bg-gray-900 border border-gray-700 hover:border-gray-600 cursor-pointer';
+            const short = (item.email_text || '').slice(0, 80).replace(/\n/g, ' ');
+            li.innerHTML = `<div class="flex items-center justify-between">
+              <span class="text-gray-300 truncate pr-3">${short}${short.length === 80 ? '…' : ''}</span>
+              <span class="text-sm ${item.risk < 30 ? 'text-green-400' : (item.risk < 70 ? 'text-yellow-400' : 'text-red-400')}">${item.risk}%</span>
+            </div>`;
+            li.addEventListener('click', () => {
+              renderResults(item.risk, item.indicators);
+              emailEl.value = item.email_text || '';
+            });
+            historyList.appendChild(li);
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
 
-      navToggle.addEventListener("click", () => {
-        navContent.classList.toggle("hidden");
-      });
+      // Initial load
+      loadHistory();
+
+      // Mobile menu toggle
+      const navToggle = document.getElementById('nav-toggle');
+      const navContent = document.getElementById('nav-content');
+      navToggle.addEventListener('click', () => { navContent.classList.toggle('hidden'); });
     </script>
   </body>
 </html>

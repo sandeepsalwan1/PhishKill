@@ -1,6 +1,5 @@
 ## PhishKill
-PhishKill enhances email security by using AI to detect phishing threats and assess risks. link: https://phishkill1-c5b98987403b.herokuapp.com/
- It provides actionable advice, empowering users to protect themselves against malicious emails. Example:
+PhishKill is now a full-stack Flask app with a polished Tailwind UI, JSON API, SQLite history, and one-click deploy options (Heroku or Docker). It uses OpenAI to detect phishing indicators and provide a risk score.
 
 <p align="center">
   <img src="resources/example.jpg" alt="Example Image" width="100%">
@@ -183,49 +182,64 @@ Before getting started with PhishKill, ensure your runtime environment meets the
 - **Package Manager:** Pip
 
 
-### ⚙️ Installation
+### ⚙️ Local Setup (Python)
 
-Install PhishKill using one of the following methods:
-
-**Build from source:**
-
-1. Clone the PhishKill repository:
+1) Create `.env` from example and set your key:
 ```sh
-❯ git clone https://github.com/sandeepsalwan1/PhishKill
+cp .env.example .env
+```
+2) Create virtualenv and install deps:
+```sh
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+pip install -r EmailPhishingScript/requirements.txt
+```
+3) Run the app:
+```sh
+export FLASK_APP=EmailPhishingScript/app.py
+python EmailPhishingScript/app.py
+```
+4) Visit the UI:
+```text
+http://localhost:5000/
 ```
 
-2. Navigate to the project directory:
-```sh
-❯ cd PhishKill
+Health check:
+```text
+GET http://localhost:5000/healthz
 ```
 
-3. Install the project dependencies:
+### 🐳 Docker
 
-
-**Using `pip`** &nbsp; [<img align="center" src="" />]()
-
+Build and run container:
 ```sh
-❯ echo 'INSERT-INSTALL-COMMAND-HERE'
+docker build -t phishkill:latest .
+docker run --rm -p 5000:5000 --env-file .env phishkill:latest
 ```
 
+### ☁️ Heroku
 
-
-
-### 🤖 Usage
-Run PhishKill using the following command:
-**Using `pip`** &nbsp; [<img align="center" src="" />]()
-
+1) Ensure you have a Heroku account and the CLI installed.
+2) Create app and set config:
 ```sh
-❯ echo 'INSERT-RUN-COMMAND-HERE'
+heroku create
+heroku config:set OPENAI_API_KEY=YOUR_KEY
 ```
+3) Deploy:
+```sh
+git add . && git commit -m "Deploy"
+git push heroku HEAD:main
+```
+Open the app URL printed by Heroku.
 
 
 ### 🧪 Testing
-Run the test suite using the following command:
-**Using `pip`** &nbsp; [<img align="center" src="" />]()
-
-```sh
-❯ echo 'INSERT-TEST-COMMAND-HERE'
+Manual smoke test:
+```text
+1) Load the homepage and use the sample email
+2) Ensure risk gauge and indicators render
+3) Refresh Recent Analyses and click items to load
+4) Check /healthz returns {"status":"ok"}
 ```
 
 
